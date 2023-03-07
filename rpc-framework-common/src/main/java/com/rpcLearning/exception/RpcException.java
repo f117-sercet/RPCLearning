@@ -1,6 +1,5 @@
 package com.rpcLearning.exception;
-
-import github.javaguide.enums.RpcErrorMessageEnum;
+import com.rpcLearning.enums.RpcErrorMessageEnum;
 
 /**
  * @author shuang.kou
