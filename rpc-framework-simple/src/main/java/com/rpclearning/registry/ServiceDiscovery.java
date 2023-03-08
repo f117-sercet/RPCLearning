@@ -1,6 +1,9 @@
 package com.rpclearning.registry;
 
 import com.rpcLearning.extension.SPI;
+import com.rpclearning.remoting.dto.RpcRequest;
+
+import java.net.InetSocketAddress;
 
 /**
  * 服务发现
@@ -10,4 +13,13 @@ import com.rpcLearning.extension.SPI;
  */
 @SPI
 public interface ServiceDiscovery {
+
+    /**
+     * lookup service by rpcServiceName
+     *
+     * @param rpcRequest rpc service pojo
+     * @return service address
+     */
+
+    InetSocketAddress lookupService(RpcRequest rpcRequest);
 }
