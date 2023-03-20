@@ -1,15 +1,14 @@
-package com.rpcLearning.remoting.transport.server;
+package com.rpcLearning.remoting.transport.netty.server;
 
-import com.rpcLearning.factory.SingletonFactory;
-import com.rpcLearning.remoting.transport.netty.server.NettyRpcServerHandler;
-import com.rpcLearning.utils.RuntimeUtil;
-import com.rpcLearning.utils.concurrent.threadpool.ThreadPoolFactoryUtil;
 import com.rpcLearning.config.CustomShutdownHook;
 import com.rpcLearning.config.RpcServiceConfig;
+import com.rpcLearning.factory.SingletonFactory;
 import com.rpcLearning.provider.ServiceProvider;
 import com.rpcLearning.provider.impl.ZkServiceProviderImpl;
 import com.rpcLearning.remoting.transport.codec.RpcMessageDecoder;
 import com.rpcLearning.remoting.transport.codec.RpcMessageEncoder;
+import com.rpcLearning.utils.RuntimeUtil;
+import com.rpcLearning.utils.concurrent.threadpool.ThreadPoolFactoryUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -27,11 +26,11 @@ import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Server. Receive the client message, call the corresponding method according to the client message,
- * and then return the result to the client.
+ * Description：
+ * 服务，收到客户端信息，根据客户端的信息调用相关方法，并且返回给客户端
  *
  * @author: 段世超
- * @aate: Created in 2023/3/15 15:39
+ * @aate: Created in 2023/3/20 14:43
  */
 @Slf4j
 @Component
@@ -46,7 +45,7 @@ public class NettyRpcServer {
     }
 
     @SneakyThrows
-    public void start() {
+    public void start(){
         CustomShutdownHook.getCustomShutdownHook().clearAll();
         String host = InetAddress.getLocalHost().getHostAddress();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -55,7 +54,9 @@ public class NettyRpcServer {
                 RuntimeUtil.cpus() * 2,
                 ThreadPoolFactoryUtil.createThreadFactory("service-handler-group", false)
         );
+
         try {
+
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
@@ -81,18 +82,21 @@ public class NettyRpcServer {
 
             // 绑定端口，同步等待绑定成功
             ChannelFuture f = b.bind(host, PORT).sync();
+
             // 等待服务端监听端口关闭
             f.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            log.error("occur exception when start server:", e);
-        } finally {
-            log.error("shutdown bossGroup and workerGroup");
+
+        }catch (Exception e) {
+
+            log.error("occur exception when start server", e);
+
+        }finally {
+            log.error("shutdowm bossGroup and workerGroup");
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
             serviceHandlerGroup.shutdownGracefully();
+
         }
     }
 
-
 }
-
