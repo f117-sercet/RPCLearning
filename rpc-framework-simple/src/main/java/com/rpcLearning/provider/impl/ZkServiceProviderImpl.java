@@ -6,6 +6,7 @@ import com.rpcLearning.exception.RpcException;
 import com.rpcLearning.extension.ExtensionLoader;
 import com.rpcLearning.config.RpcServiceConfig;
 import com.rpcLearning.provider.ServiceProvider;
+import com.rpcLearning.remoting.transport.server.NettyRpcServer;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.spi.ServiceRegistry;
@@ -28,11 +29,9 @@ public class ZkServiceProviderImpl implements ServiceProvider {
      * key: rpc service name(interface name + version + group)
      * value: service object
      */
-
     private final Map<String, Object> serviceMap;
     private final Set<String> registeredService;
     private final ServiceRegistry serviceRegistry;
-
 
     public ZkServiceProviderImpl() {
         serviceMap = new ConcurrentHashMap<>();
@@ -42,39 +41,33 @@ public class ZkServiceProviderImpl implements ServiceProvider {
 
     @Override
     public void addService(RpcServiceConfig rpcServiceConfig) {
-
-        String rpcServiceName = rpcServiceConfig.getServiceName();
+        String rpcServiceName = rpcServiceConfig.getRpcServiceName();
         if (registeredService.contains(rpcServiceName)) {
-
             return;
         }
-
         registeredService.add(rpcServiceName);
         serviceMap.put(rpcServiceName, rpcServiceConfig.getService());
-        log.info("Add service: {} and interfaces:{}" + rpcServiceName, rpcServiceConfig.getService().getClass().getInterfaces());
-
+        log.info("Add service: {} and interfaces:{}", rpcServiceName, rpcServiceConfig.getService().getClass().getInterfaces());
     }
 
     @Override
     public Object getService(String rpcServiceName) {
-
         Object service = serviceMap.get(rpcServiceName);
         if (null == service) {
-            throw  new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_FOUND);
+            throw new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_FOUND);
         }
         return service;
     }
 
     @Override
     public void publishService(RpcServiceConfig rpcServiceConfig) {
-
         try {
-            String host = Arrays.toString(InetAddress.getLocalHost().getAddress());
+            String host = InetAddress.getLocalHost().getHostAddress();
             this.addService(rpcServiceConfig);
             serviceRegistry.registerService(rpcServiceConfig.getRpcServiceName(), new InetSocketAddress(host, NettyRpcServer.PORT));
-        }catch (UnknownHostException e){
-
+        } catch (UnknownHostException e) {
             log.error("occur exception when getHostAddress", e);
         }
     }
+
 }
