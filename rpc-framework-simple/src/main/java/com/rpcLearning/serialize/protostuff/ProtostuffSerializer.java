@@ -1,4 +1,4 @@
-package com.rpcLearning.protostuff;
+package com.rpcLearning.serialize.protostuff;
 
 import com.rpcLearning.serialize.Serializer;
 import io.protostuff.LinkedBuffer;

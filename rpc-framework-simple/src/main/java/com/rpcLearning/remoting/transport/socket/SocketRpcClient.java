@@ -1,4 +1,4 @@
-package com.rpcLearning.remoting.socket;
+package com.rpcLearning.remoting.transport.socket;
 
 import com.rpcLearning.enums.SerializationTypeEnum;
 import com.rpcLearning.enums.ServiceDiscoveryEnum;

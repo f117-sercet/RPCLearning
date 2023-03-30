@@ -1,5 +1,6 @@
 package com.rpcLearning.remoting.transport.netty.server;
 
+
 import com.rpcLearning.enums.CompressTypeEnum;
 import com.rpcLearning.enums.RpcResponseCodeEnum;
 import com.rpcLearning.enums.SerializationTypeEnum;
@@ -9,7 +10,6 @@ import com.rpcLearning.remoting.dto.RpcMessage;
 import com.rpcLearning.remoting.dto.RpcRequest;
 import com.rpcLearning.remoting.dto.RpcResponse;
 import com.rpcLearning.remoting.handler.RpcRequestHandler;
-import com.rpcLearning.serialize.Serializer;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -20,11 +20,13 @@ import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Customize the ChannelHandler of the server to process the data sent by the client.
+ * <p>
  * 如果继承自 SimpleChannelInboundHandler 的话就不要考虑 ByteBuf 的释放 ，{@link SimpleChannelInboundHandler} 内部的
  * channelRead 方法会替你释放 ByteBuf ，避免可能导致的内存泄露问题。详见《Netty进阶之路 跟着案例学 Netty》
  *
- * @author: 段世超
- * @aate: Created in 2023/3/20 14:59
+ * @author shuang.kou
+ * @createTime 2020年05月25日 20:44:00
  */
 @Slf4j
 public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
@@ -32,7 +34,6 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
     private final RpcRequestHandler rpcRequestHandler;
 
     public NettyRpcServerHandler() {
-
         this.rpcRequestHandler = SingletonFactory.getInstance(RpcRequestHandler.class);
     }
 
@@ -91,4 +92,3 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 }
-
