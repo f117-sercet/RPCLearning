@@ -14,10 +14,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -73,6 +70,19 @@ public final class CuratorUtils {
 
             return SERVICE_ADDRESS_MAP.get(rpcServiceName);
         }
+        List<String> result = null;
+        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + rpcServiceName;
+
+        try {
+
+            result = zkClient.getChildren().forPath(servicePath);
+            result = zkClient.getChildren().forPath(servicePath);
+            SERVICE_ADDRESS_MAP.put(rpcServiceName, result);
+            registerWatcher(rpcServiceName, zkClient);
+        }catch (Exception e) {
+            log.error("get children nodes for path [{}] fail", servicePath);
+        }
+        return result;
     }
 
     /**
@@ -92,29 +102,31 @@ public final class CuratorUtils {
     }
 
     public static CuratorFramework getZkClient() {
-        // check if user has set zk address
+      // check if user has set zk address
         Properties properties = PropertiesFileUtil.readPropertiesFile(RpcConfigEnum.RPC_CONFIG_PATH.getPropertyValue());
         String zookeeperAddress = properties != null && properties.getProperty(RpcConfigEnum.ZK_ADDRESS.getPropertyValue()) != null ? properties.getProperty(RpcConfigEnum.ZK_ADDRESS.getPropertyValue()) : DEFAULT_ZOOKEEPER_ADDRESS;
-        // if zkClient has been started, return directly
+
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             return zkClient;
         }
-        // Retry strategy. Retry 3 times, and will increase the sleep time between retries.
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(BASE_SLEEP_TIME, MAX_RETRIES);
+        ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(BASE_SLEEP_TIME, MAX_RETRIES);
+
         zkClient = CuratorFrameworkFactory.builder()
-                // the server to connect to (can be a server list)
                 .connectString(zookeeperAddress)
                 .retryPolicy(retryPolicy)
                 .build();
         zkClient.start();
+
         try {
-            // wait 30s until connect to the zookeeper
-            if (!zkClient.blockUntilConnected(30, TimeUnit.SECONDS)) {
-                throw new RuntimeException("Time out waiting to connect to ZK!");
+            if (zkClient.blockUntilConnected(30, TimeUnit.SECONDS)) {
+                throw new RuntimeException("Time out waiting to connect to ZooKeeper!");
+
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
+
         return zkClient;
     }
 
