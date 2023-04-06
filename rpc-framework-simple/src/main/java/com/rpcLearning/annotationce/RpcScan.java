@@ -1,5 +1,6 @@
 package com.rpcLearning.annotationce;
 
+import com.rpcLearning.spring.CustomScannerRegistrar;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -15,5 +16,7 @@ import java.lang.annotation.*;
 @Import(CustomScannerRegistrar.class)
 @Documented
 public @interface RpcScan {
+
+    String[] basePackage();
 
 }
