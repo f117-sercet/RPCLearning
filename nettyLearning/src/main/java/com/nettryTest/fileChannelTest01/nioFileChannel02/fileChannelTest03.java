@@ -22,6 +22,21 @@ public class fileChannelTest03 {
         FileChannel fileChannel02 = fileInputStream.getChannel();
         ByteBuffer byteBuffer = ByteBuffer.allocate(521);
 
+        while (true) {
+            byteBuffer.clear();
+            int read = fileChannel01.read(byteBuffer);
+            if (read == -1) {
 
+                // 表示读完
+                break;
+            }
+            // 将buffer 中的数据写入到fileChannel02
+            byteBuffer.flip();
+            fileChannel02.write(byteBuffer);
+        }
+
+        // 关闭相应的流
+        fileInputStream.close();
+        fileOutputStream.close();
     }
 }
